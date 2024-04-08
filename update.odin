@@ -3,6 +3,39 @@ package main
 import "core:fmt"
 import "core:math"
 
+// TODO
+// 1) move all creatures and player
+// 2) check for collisions
+// 3) update grounded_state based on where they moved. if they are inside a wall, push them back etc
+
+
+// NOTE player action
+
+// should i even use friction and acceleration? jump should use acceleration curve atleast... Make that later!
+// yes i do that for now. can fix later
+
+
+update_world :: proc(ms_since_last_update: f32){
+  left := includes(keyboard.pressed_or_held_last_frame, Action.LEFT)
+  right := includes(keyboard.pressed_or_held_last_frame, Action.RIGHT)
+  jump := includes(keyboard.pressed_or_held_last_frame, Action.JUMP)
+  
+  if left{
+    player.acceleration.x = -PLAYER_ACCELERATION
+  }else if right{
+    player.acceleration.x = PLAYER_ACCELERATION
+  }
+
+  if player.vertical_movement_state == VERTICAL_MOVEMENT_STATE.grounded && jump{
+    player.velocity.y = 100
+  }
+
+  player.velocity += player.acceleration * ms_since_last_update/1000.0
+  player.position += player.velocity * ms_since_last_update/1000.0
+
+
+   //update_entity_positions()
+}
 
 // first := true
 //

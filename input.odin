@@ -1,58 +1,77 @@
 package main
 
-import SDL "vendor:sdl2"
 import "core:fmt"
+import SDL "vendor:sdl2"
 
-handle_key_press::proc(event: SDL.Event) -> bool{
-			if event.type == SDL.EventType.QUIT {return false}
 
-			if event.type == SDL.EventType.KEYDOWN {
-				if event.key.keysym.scancode == SDL.Scancode.A {
-					keyboard_state.left.pressed_since_last_update = true
-					keyboard_state.left.currently_pressed = true
-				}
+// NOTE 
+// keyup and keydown
 
-				if event.key.keysym.scancode == SDL.Scancode.W {
-					keyboard_state.jump.pressed_since_last_update = true
-					keyboard_state.jump.currently_pressed = true
-				}
+// holding => activated 
+// pressed => ja activate, ja pressed
+// keyup take away from holding
 
-				if event.key.keysym.scancode == SDL.Scancode.D {
-					keyboard_state.right.pressed_since_last_update = true
-					keyboard_state.right.currently_pressed = true
-				}
+// if click left, inactivate right and the other way around
 
-				if event.key.keysym.scancode == SDL.Scancode.S {
-					keyboard_state.crouch.pressed_since_last_update = true
-					keyboard_state.crouch.currently_pressed = true
-				}
 
-				if event.key.keysym.scancode == SDL.Scancode.ESCAPE {
-          return false
-				}
-			}
-
-			if event.type == SDL.EventType.KEYUP {
-				if event.key.keysym.scancode == SDL.Scancode.A {
-					keyboard_state.left.currently_pressed = false
-				}
-
-				if event.key.keysym.scancode == SDL.Scancode.W {
-					keyboard_state.jump.currently_pressed = false
-				}
-
-				if event.key.keysym.scancode == SDL.Scancode.D {
-					keyboard_state.right.currently_pressed = false
-				}
-
-				if event.key.keysym.scancode == SDL.Scancode.S {
-					keyboard_state.crouch.currently_pressed = false
-				}
-        // fmt.println(event.key.keysym.scancode)
-        // fmt.println(keyboard_state)
-			}
-
-      
-      return true
+keydown :: proc(action: Action) {
+	if !includes(keyboard.holding, action) {
+		append(&keyboard.holding, action)
+	}
+	if !includes(keyboard.pressed_or_held_last_frame, action) {
+		append(&keyboard.pressed_or_held_last_frame, action)
+	}
 }
 
+handle_key_press :: proc(event: SDL.Event) -> bool {
+	if event.type == SDL.EventType.QUIT {return false}
+
+	keyboard.pressed_or_held_last_frame = keyboard.holding
+
+	if event.type == SDL.EventType.KEYDOWN {
+
+		if event.key.keysym.scancode == SDL.Scancode.A {
+			keydown(Action.LEFT)
+      remove(&keyboard.holding, Action.RIGHT)
+      remove(&keyboard.pressed_or_held_last_frame, Action.RIGHT)
+		}
+		if event.key.keysym.scancode == SDL.Scancode.D {
+			keydown(Action.RIGHT)
+      remove(&keyboard.holding, Action.LEFT)
+      remove(&keyboard.pressed_or_held_last_frame, Action.LEFT)
+		}
+
+		if event.key.keysym.scancode == SDL.Scancode.W {
+			keydown(Action.JUMP)
+		}
+
+
+		if event.key.keysym.scancode == SDL.Scancode.S {
+			keydown(Action.CROUCH)
+		}
+
+		if event.key.keysym.scancode == SDL.Scancode.ESCAPE {
+			return false
+		}
+	}
+
+	if event.type == SDL.EventType.KEYUP {
+		if event.key.keysym.scancode == SDL.Scancode.A {
+      remove(&keyboard.holding, Action.LEFT)
+    }
+
+		if event.key.keysym.scancode == SDL.Scancode.W {
+      remove(&keyboard.holding, Action.JUMP)
+		}
+
+		if event.key.keysym.scancode == SDL.Scancode.D {
+      remove(&keyboard.holding, Action.RIGHT)
+		}
+
+		if event.key.keysym.scancode == SDL.Scancode.S {
+      remove(&keyboard.holding, Action.CROUCH)
+		}
+	}
+
+	return true
+}

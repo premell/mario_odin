@@ -23,7 +23,7 @@ HitBox :: struct {
 }
 
 CREATURE_TYPE :: enum {
-  goomba, 
+  goomba,  // start with this one only...
   koopa, 
   bullet_bill,
   pipe_trap
@@ -59,7 +59,7 @@ Player :: struct {
 }
 
 // ENUMS
-BLOCK_TYPE :: enum {
+BLOCK :: enum {
 	ground,
   fire,
   wall,
@@ -68,7 +68,7 @@ BLOCK_TYPE :: enum {
 
 // STRUCTS
 Block :: struct {
-  type: BLOCK_TYPE,
+  type: BLOCK,
   // always bottom left
   position: [2]f32,
   hit_box: HitBox
@@ -80,13 +80,24 @@ World :: struct {
 	world_update_tick: time.Tick,
 }
 
-KeyState :: struct {
-	pressed_since_last_update: bool,
-	currently_pressed:         bool,
+// KeyState :: struct {
+// 	pressed_since_last_update: bool,
+// 	currently_pressed:         bool,
+// }
+
+Action :: enum {
+  LEFT,
+  RIGHT,
+  JUMP, 
+  CROUCH
 }
-KeyboardState :: struct {
-	left:   KeyState,
-	right:  KeyState,
-	jump:   KeyState,
-	crouch: KeyState,
+
+Keyboard :: struct {
+  holding: [dynamic]Action,
+  pressed_or_held_last_frame: [dynamic]Action
 }
+
+	// left:   KeyState,
+	// right:  KeyState,
+	// jump:   KeyState,
+	// crouch: KeyState,

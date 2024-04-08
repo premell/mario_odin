@@ -28,7 +28,7 @@ main :: proc() {
 
 	assert(window != nil, SDL.GetErrorString())
 
-	game.renderer = SDL.CreateRenderer(window, -1, SDL.RENDERER_ACCELERATED)
+	game.renderer = SDL.CreateRenderer(window, -1, SDL.RENDERER_PRESENTVSYNC)
 	assert(game.renderer != nil, SDL.GetErrorString())
 
 	// game.texture = SDL_image.LoadTexture(game.renderer, "assets/sprites.png")
@@ -38,6 +38,8 @@ main :: proc() {
 	// texture_width: i32
 	// SDL.QueryTexture(game.texture, nil, nil, &texture_width, &texture_height)
 	// game.images_per_row = texture_width / BLOCK_SIZE
+
+  create_world()
 
 	event: SDL.Event
 	loop: for {

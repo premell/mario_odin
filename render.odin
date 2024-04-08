@@ -3,7 +3,6 @@ import "core:fmt"
 import SDL "vendor:sdl2"
 
 render_world :: proc() {
-
 	camera_bottom_left_corner :=
 		player.position +
 		[2]f32{f32(player.hit_box.width), f32(player.hit_box.height + 5)} / 2 -
@@ -13,17 +12,23 @@ render_world :: proc() {
 	// RENDER BLOCKS
 	for block, index in world.blocks {
 		switch block.type {
-		case BLOCK_TYPE.fire:
+		case BLOCK.fire:
 			SDL.SetRenderDrawColor(game.renderer, 255, 0, 0, 255)
-		case BLOCK_TYPE.wall:
+		case BLOCK.wall:
 			SDL.SetRenderDrawColor(game.renderer, 0, 0, 0, 255)
-		case BLOCK_TYPE.ground:
+		case BLOCK.ground:
 			SDL.SetRenderDrawColor(game.renderer, 0, 0, 0, 255)
-		case BLOCK_TYPE.door:
+		case BLOCK.door:
 			SDL.SetRenderDrawColor(game.renderer, 155, 155, 155, 255)
 		}
 
 		block_position_relative_to_camera := block.position - camera_bottom_left_corner
+
+    @static test := 0
+    test = test + 1
+    if test > 5 {return}
+    fmt.print(block)
+
 
 		SDL.RenderFillRect(
 			game.renderer,
@@ -37,8 +42,8 @@ render_world :: proc() {
 		)
 	}
 
+	// RENDER PLAYER
 	player_position_relative_to_camera := player.position - camera_bottom_left_corner
-
 	SDL.SetRenderDrawColor(game.renderer, 255, 0, 0, 255)
 	SDL.RenderFillRect(
 		game.renderer,
@@ -51,11 +56,7 @@ render_world :: proc() {
 		},
 	)
 
-
-	// RENDER PLAYER
-
 	SDL.RenderPresent(game.renderer)
-
 
 	SDL.SetRenderDrawColor(game.renderer, 255, 255, 255, 100)
 	SDL.RenderClear(game.renderer)
