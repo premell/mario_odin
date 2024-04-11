@@ -15,6 +15,15 @@ import SDL "vendor:sdl2"
 import SDL_image "vendor:sdl2/image"
 
 main :: proc() {
+
+  //context.logger = log.create_console_logger()
+
+  // tracking_allocator: mem.tracking_allocator
+  // mem.tracking_allocator_init(&tracking_allocator, context.allocator)
+  // context.allocator = mem.tracking_allocator(&tracking_allocator)
+
+
+
 	assert(SDL.Init(SDL.INIT_VIDEO) == 0, SDL.GetErrorString())
 
 	window := SDL.CreateWindow(
@@ -43,11 +52,14 @@ main :: proc() {
 
 	event: SDL.Event
 	loop: for {
+	  keyboard.pressed_or_held_last_frame = keyboard.holding
 		if SDL.PollEvent(&event) {
 			if !handle_key_press(event) {
 				break
 			}
 		}
+
+    //fmt.print(keyboard.pressed_or_held_last_frame)
 
 		@(static)
 		lastUpdate: time.Tick
@@ -56,5 +68,7 @@ main :: proc() {
 
 		update_world(ms_since_last_update)
     render_world()
+
+    free_all(context.temp_allocator)
 	}
 }

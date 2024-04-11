@@ -24,12 +24,6 @@ render_world :: proc() {
 
 		block_position_relative_to_camera := block.position - camera_bottom_left_corner
 
-    @static test := 0
-    test = test + 1
-    if test > 5 {return}
-    fmt.print(block)
-
-
 		SDL.RenderFillRect(
 			game.renderer,
 			&SDL.Rect {

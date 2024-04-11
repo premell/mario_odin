@@ -1,5 +1,7 @@
 package main
 
+import "core:fmt"
+
 includes :: proc(array: [dynamic]$E, elem_to_check: E) -> bool{
   for e in array {
     if e == elem_to_check {

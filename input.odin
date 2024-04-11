@@ -26,7 +26,6 @@ keydown :: proc(action: Action) {
 handle_key_press :: proc(event: SDL.Event) -> bool {
 	if event.type == SDL.EventType.QUIT {return false}
 
-	keyboard.pressed_or_held_last_frame = keyboard.holding
 
 	if event.type == SDL.EventType.KEYDOWN {
 
@@ -41,12 +40,12 @@ handle_key_press :: proc(event: SDL.Event) -> bool {
       remove(&keyboard.pressed_or_held_last_frame, Action.LEFT)
 		}
 
-		if event.key.keysym.scancode == SDL.Scancode.W {
+		if event.key.keysym.scancode == SDL.Scancode.SPACE {
 			keydown(Action.JUMP)
 		}
 
 
-		if event.key.keysym.scancode == SDL.Scancode.S {
+		if event.key.keysym.scancode == SDL.SCANCODE_LCTRL {
 			keydown(Action.CROUCH)
 		}
 
@@ -60,15 +59,15 @@ handle_key_press :: proc(event: SDL.Event) -> bool {
       remove(&keyboard.holding, Action.LEFT)
     }
 
-		if event.key.keysym.scancode == SDL.Scancode.W {
-      remove(&keyboard.holding, Action.JUMP)
-		}
-
 		if event.key.keysym.scancode == SDL.Scancode.D {
       remove(&keyboard.holding, Action.RIGHT)
 		}
 
-		if event.key.keysym.scancode == SDL.Scancode.S {
+		if event.key.keysym.scancode == SDL.Scancode.SPACE {
+      remove(&keyboard.holding, Action.JUMP)
+		}
+
+		if event.key.keysym.scancode == SDL.SCANCODE_LCTRL {
       remove(&keyboard.holding, Action.CROUCH)
 		}
 	}

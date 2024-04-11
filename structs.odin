@@ -18,8 +18,8 @@ Game :: struct {
 
 // always a rectangle for now...
 HitBox :: struct {
-  width: int,
-  height: int
+  width: f32,
+  height: f32 
 }
 
 CREATURE_TYPE :: enum {
@@ -42,6 +42,8 @@ Creature :: struct {
   vertical_movement_state: VERTICAL_MOVEMENT_STATE,
 	has_jumped, facing_left_else_right: bool,
   health: int,
+
+  // position is bottom left corner of the hitbox
 	position, velocity: [2]f32,
   
   //, acceleration, TODO should they even have acceleration?
@@ -55,6 +57,7 @@ Player :: struct {
   vertical_movement_state: VERTICAL_MOVEMENT_STATE,
 	has_jumped, facing_left_else_right: bool,
   health: int,
+  // position is bottom left corner of the hitbox
 	position, velocity, acceleration: [2]f32,
 }
 
@@ -76,7 +79,7 @@ Block :: struct {
 
 World :: struct {
 	// blocks are collidable 
-	blocks:            []Block,
+	blocks:            [dynamic]Block,
 	world_update_tick: time.Tick,
 }
 
@@ -96,6 +99,13 @@ Keyboard :: struct {
   holding: [dynamic]Action,
   pressed_or_held_last_frame: [dynamic]Action
 }
+
+Collision :: struct{
+  direction: DIRECTION,
+  depth: f32
+}
+
+// size_of(Action)
 
 	// left:   KeyState,
 	// right:  KeyState,
