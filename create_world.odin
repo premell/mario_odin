@@ -25,6 +25,22 @@ create_world :: proc(){
           height = 1,
           width = 1
         }
+      },
+      {
+        type = BLOCK.ground,
+        position = {-3,0},
+        hit_box = {
+          height = 1,
+          width = 1
+        }
+      },
+      {
+        type = BLOCK.ground,
+        position = {3,0},
+        hit_box = {
+          height = 1,
+          width = 1
+        }
       }
     }
   }

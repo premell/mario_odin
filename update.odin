@@ -60,82 +60,91 @@ update_from_collisions :: proc() {
 	player.vertical_movement_state = VERTICAL_MOVEMENT_STATE.falling
 
 	for block in world.blocks {
-		collisions := check_collision(
+		collision := check_collision(
 			player.hit_box,
 			player.position,
 			block.hit_box,
 			block.position,
 		)
 
+		if collision.depth == 0 {continue;}
 
-		for c in collisions {
-			if c.direction == DIRECTION.DOWN {
-				player.position.y += c.depth
-				player.velocity.y = 0
-				player.acceleration.y = 0
-				player.vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded
-			}
+		if collision.direction == DIRECTION.DOWN {
+			player.position.y += collision.depth
+			player.velocity.y = 0
+			player.acceleration.y = 0
+			player.vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded
+		} else if collision.direction == DIRECTION.RIGHT {
+			player.position.x -= collision.depth
+			player.velocity.x = 0
+			player.acceleration.x = 0
 		}
 	}
 }
 
+// TODO TODAY
+// [] 
 
+
+// collision direction is from the perspective of hitbox1. so if the collision is right
+// position2 is to the right of position1
 check_collision :: proc(
 	hitbox1: HitBox,
 	position1: [2]f32,
 	hitbox2: HitBox,
 	position2: [2]f32,
-) -> [dynamic]Collision {
+) ->
+	Collision{
 	x_1 := position1[0]
 	x_2 := position2[0]
 
 	y_1 := position1[1]
 	y_2 := position2[1]
 
-	collisions: [dynamic]Collision = {}
-
-	// block is to the right of the player
 	hit_right := x_1 > x_2 && (x_1 - x_2) < hitbox2.width
-	// block is to the left of the player
 	hit_left := x_2 > x_1 && (x_2 - x_1) < hitbox1.width
 
-	// block is above the player
 	hit_top := y_2 > y_1 && (y_2 - y_1) < hitbox1.height
-	// block is below the player
 	hit_bottom := y_1 > y_2 && (y_1 - y_2) < hitbox2.height
 
 	hit_horizontally := hit_right || hit_left
 	hit_vertically := hit_top || hit_bottom
 
+	deepest_collision: Collision = {}
+
 	if hit_top || hit_bottom {
 		if hit_right {
-			append_elem(
-				&collisions,
-				Collision{direction = DIRECTION.RIGHT, depth = hitbox2.width - (x_2 - x_1)},
-			)
+			col := Collision {
+				direction = DIRECTION.RIGHT,
+				depth     = hitbox2.width - (x_2 - x_1),
+			}
+			if col.depth > deepest_collision.depth {deepest_collision = col}
 		} else if hit_left {
-			append_elem(
-				&collisions,
-				Collision{direction = DIRECTION.LEFT, depth = hitbox1.width - (x_1 - x_2)},
-			)
+			col := Collision {
+				direction = DIRECTION.LEFT,
+				depth     = hitbox1.width - (x_1 - x_2),
+			}
+			if col.depth > deepest_collision.depth {deepest_collision = col}
 		}
 	}
 
 	if hit_left || hit_right {
 		if hit_top {
-			append_elem(
-				&collisions,
-				Collision{direction = DIRECTION.UP, depth = hitbox1.height - (y_2 - y_1)},
-			)
+			col := Collision {
+				direction = DIRECTION.UP,
+				depth     = hitbox1.height - (y_2 - y_1),
+			}
+			if col.depth > deepest_collision.depth {deepest_collision = col}
 		} else if hit_bottom {
-			append_elem(
-				&collisions,
-				Collision{direction = DIRECTION.DOWN, depth = hitbox2.height - (y_1 - y_2)},
-			)
+			col := Collision {
+				direction = DIRECTION.DOWN,
+				depth     = hitbox2.height - (y_1 - y_2),
+			}
+			if col.depth > deepest_collision.depth {deepest_collision = col}
 		}
 	}
 
-	return collisions
+  return deepest_collision
 }
 
 
