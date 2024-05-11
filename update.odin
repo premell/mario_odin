@@ -22,6 +22,7 @@ update_world :: proc(ms_since_last_update: f32) {
 
 	if grounded && jump {
 		player.velocity.y = 25
+		player.vertical_movement_state = VERTICAL_MOVEMENT_STATE.jumping
 	}
 
 	velocity_before := player.velocity
