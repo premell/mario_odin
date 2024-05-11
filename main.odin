@@ -61,8 +61,9 @@ main :: proc() {
 
     //fmt.print(keyboard.pressed_or_held_last_frame)
 
-		@(static)
-		lastUpdate: time.Tick
+		@(static) lastUpdate: time.Tick
+		if lastUpdate._nsec == 0 { lastUpdate = time.tick_now()}
+
 		ms_since_last_update := f32(time.duration_milliseconds(time.tick_since(lastUpdate)))
 		lastUpdate = time.tick_now()
 
