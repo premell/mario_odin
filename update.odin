@@ -46,15 +46,33 @@ update_world :: proc(ms_since_last_update: f32) {
 
 	player.position = player.position + player.velocity * ms_since_last_update / 1000.0
 
-	update_from_collisions(player.position)
+	update_collisions(player.position)
 }
 
-update_from_collisions :: proc(position: [2]f32) {
+
+update_collisions :: proc(position: [2]f32) {
 	// atm just take the closest path to getting out...
 
+	// check creatures
+	for creature in world.creatures {
+		// collision := check_collision(
+		// 	player.hit_box,
+		// 	player.position,
+		// 	creature.hit_box,
+		// 	creature.position,
+		// )
+
+		// if collision.direction == DIRECTION.NONE {continue}
+
+
+		//player.position.x = -10000
+
+
+	}
+
+
+	// check blocks
 	for block in world.blocks {
-
-
 		collision := check_collision(
 			player.hit_box,
 			player.position,
@@ -62,59 +80,18 @@ update_from_collisions :: proc(position: [2]f32) {
 			block.position,
 		)
 
-		// if block.position == {3, 0} {
-		// 	fmt.print(collision)
-		// }
+		if collision.direction == DIRECTION.NONE {continue}
 
-		if !collision {continue}
-
-		shortest_distance: f32 = 1000.0
-		side_with_shortest_distance_to_escape := DIRECTION.UP
-
-		distance_to_escape_top := block.position.y + block.hit_box.height - player.position.y
-		distance_to_escape_bottom := player.position.y + player.hit_box.height - block.position.y
-		distance_to_escape_left := player.position.x + player.hit_box.width - block.position.x
-		distance_to_escape_right := block.position.x + block.hit_box.width - player.position.x
-
-		if distance_to_escape_top < shortest_distance &&
-		   distance_to_escape_top > -EPSILON &&
-		   distance_to_escape_top < block.hit_box.height {
-			shortest_distance = distance_to_escape_top
-			side_with_shortest_distance_to_escape = DIRECTION.UP
-		}
-
-		if distance_to_escape_bottom < shortest_distance &&
-		   distance_to_escape_bottom > -EPSILON &&
-		   distance_to_escape_bottom < block.hit_box.height {
-			shortest_distance = distance_to_escape_bottom
-			side_with_shortest_distance_to_escape = DIRECTION.DOWN
-		}
-
-
-		if distance_to_escape_left < shortest_distance &&
-		   distance_to_escape_left > -EPSILON &&
-		   distance_to_escape_left < block.hit_box.width {
-			shortest_distance = distance_to_escape_left
-			side_with_shortest_distance_to_escape = DIRECTION.LEFT
-		}
-
-		if distance_to_escape_right < shortest_distance &&
-		   distance_to_escape_right > -EPSILON &&
-		   distance_to_escape_right < block.hit_box.width {
-			shortest_distance = distance_to_escape_right
-			side_with_shortest_distance_to_escape = DIRECTION.RIGHT
-		}
-
-		if side_with_shortest_distance_to_escape == DIRECTION.UP {
-			player.position.y += distance_to_escape_top
+		if collision.direction == DIRECTION.UP {
+			player.position.y = collision.position_to_escape
+		} else if collision.direction == DIRECTION.DOWN {
+			player.position.y = collision.position_to_escape
 			player.vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded
 			player.velocity.y = 0
-		} else if side_with_shortest_distance_to_escape == DIRECTION.DOWN {
-			player.position.y -= distance_to_escape_bottom
-		} else if side_with_shortest_distance_to_escape == DIRECTION.LEFT {
-			player.position.x -= distance_to_escape_left
-		} else if side_with_shortest_distance_to_escape == DIRECTION.RIGHT {
-			player.position.x += distance_to_escape_right
+		} else if collision.direction == DIRECTION.LEFT {
+			player.position.x = collision.position_to_escape
+		} else if collision.direction == DIRECTION.RIGHT {
+			player.position.x = collision.position_to_escape
 		}
 	}
 }
@@ -126,25 +103,68 @@ check_collision :: proc(
 	position1: [2]f32,
 	hitbox2: HitBox,
 	position2: [2]f32,
-) -> bool {
+) -> Collision {
 	x_1 := position1[0]
 	x_2 := position2[0]
 
 	y_1 := position1[1]
 	y_2 := position2[1]
 
-	hit_right := x_1 - x_2 > -EPSILON && (x_1 - x_2) < hitbox2.width + EPSILON
-	hit_left := x_2 - x_1 > -EPSILON && (x_2 - x_1) < hitbox1.width + EPSILON
+	top_hit_distance: f32 = hitbox1.height - abs(y_1 - y_2)
+	top_was_hit :=
+		y_2 - y_1 > -EPSILON &&
+		top_hit_distance > -EPSILON &&
+		top_hit_distance < hitbox1.height + EPSILON
 
-	hit_top := y_2 - y_1 > -EPSILON && (y_2 - y_1) < hitbox1.height + EPSILON
-	hit_bottom := y_1 - y_2 > -EPSILON && (y_1 - y_2) < hitbox2.height + EPSILON
+	bottom_hit_distance: f32 = hitbox2.height - abs(y_2 - y_1)
+	bottom_was_hit :=
+		y_1 - y_2 > -EPSILON &&
+		bottom_hit_distance > -EPSILON &&
+		bottom_hit_distance < hitbox2.height + EPSILON
 
-	hit_horizontally := hit_right || hit_left
-	hit_vertically := hit_top || hit_bottom
+	left_hit_distance: f32 = hitbox2.width - abs(x_2 - x_1)
+	left_was_hit :=
+		x_1 - x_2 > -EPSILON &&
+		left_hit_distance > -EPSILON &&
+		left_hit_distance < hitbox2.width + EPSILON
 
-	if (hit_top || hit_bottom) && (hit_left || hit_right) {
-		return true
-	} else {
-		return false
+	right_hit_distance: f32 = hitbox1.width - abs(x_1 - x_2)
+	right_was_hit :=
+		x_2 - x_1 > -EPSILON &&
+		right_hit_distance > -EPSILON &&
+		right_hit_distance < hitbox1.width + EPSILON
+
+	if !(top_was_hit || bottom_was_hit) ||
+	   !(left_was_hit || right_was_hit) {return Collision{direction = DIRECTION.NONE}}
+
+	shortest_distance: f32 = 10000.0
+	position_to_escape: f32 = 0.0
+	shortest_direction := DIRECTION.NONE
+
+	if top_was_hit && top_hit_distance < shortest_distance {
+		shortest_distance = top_hit_distance
+
+		shortest_direction = DIRECTION.UP
+		position_to_escape = y_2 - hitbox1.height
 	}
+	if bottom_was_hit && bottom_hit_distance < shortest_distance {
+		shortest_distance = bottom_hit_distance
+
+		shortest_direction = DIRECTION.DOWN
+		position_to_escape = y_2 + hitbox2.height
+	}
+	if left_was_hit && left_hit_distance < shortest_distance {
+		shortest_distance = left_hit_distance
+
+		shortest_direction = DIRECTION.LEFT
+		position_to_escape = x_2 + hitbox2.width
+	}
+	if right_was_hit && right_hit_distance < shortest_distance {
+		shortest_distance = right_hit_distance
+
+		shortest_direction = DIRECTION.RIGHT
+		position_to_escape = x_2 - hitbox1.width
+	}
+
+	return Collision{direction = shortest_direction, position_to_escape = position_to_escape}
 }
