@@ -55,19 +55,20 @@ update_collisions :: proc(position: [2]f32) {
 
 	// check creatures
 	for creature in world.creatures {
-		// collision := check_collision(
-		// 	player.hit_box,
-		// 	player.position,
-		// 	creature.hit_box,
-		// 	creature.position,
-		// )
+		collision := check_collision(
+			player.hit_box,
+			player.position,
+			creature.hit_box,
+			creature.position,
+		)
 
-		// if collision.direction == DIRECTION.NONE {continue}
+		if collision.direction == DIRECTION.NONE {continue}
 
-
-		//player.position.x = -10000
-
-
+		if collision.direction == DIRECTION.DOWN {
+			world.creatures = {}
+		} else {
+			player.position.x = -10000
+		}
 	}
 
 
