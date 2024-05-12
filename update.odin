@@ -5,16 +5,36 @@ import "core:math"
 import "core:time"
 
 update_world :: proc(ms_since_last_update: f32) {
+	move_platforms(ms_since_last_update)
+	move_bouncing_blocks(ms_since_last_update)
 	move_creatures(ms_since_last_update)
 	move_player(ms_since_last_update)
 
 	for creature in &world.creatures {
 		update_collisions_blocks(&creature)
-		//fmt.println(creature)
 	}
 	update_collisions_blocks(&player)
 
 	update_player_creature_collision()
+}
+
+move_platforms :: proc(ms_since_last_update: f32) {
+	for platform in world.platforms {
+
+	}
+}
+
+move_bouncing_blocks :: proc(ms_since_last_update: f32) {
+	for block, index in &world.bouncing_blocks {
+		block.velocity.y += GRAVITY * ms_since_last_update / 1000.0
+		block.block.position.y += block.velocity.y * ms_since_last_update / 1000.0
+
+		if block.block.position.y < block.original_position.y {
+			block.block.position.y = block.original_position.y
+			block.velocity.y = 0
+			unordered_remove(&world.bouncing_blocks, index)
+		}
+	}
 }
 
 move_player :: proc(ms_since_last_update: f32) {
@@ -104,7 +124,6 @@ update_collisions_blocks :: proc(obj: ^Moveable) {
 	obj.vertical_movement_state = VERTICAL_MOVEMENT_STATE.falling
 
 	for block, index in world.blocks {
-		fmt.println(index)
 		collision := check_collision(obj.hit_box, obj.position, block.hit_box, block.position)
 
 		if collision.direction == DIRECTION.NONE {continue}
@@ -120,8 +139,9 @@ update_collisions_blocks :: proc(obj: ^Moveable) {
 
 			if block.type == BLOCK.questionmark_block {
 				add_upgrade(UPGRADE.big_boy)
+			} else if BLOCK_TYPES[block.type].bouncable {
+				bounce_block(&world.blocks[index])
 			}
-			// bounce block...
 
 			// bounce off
 			obj.velocity.y = BOUNCE_OF_TOP_SPEED
@@ -218,6 +238,13 @@ check_collision :: proc(
 	}
 
 	return Collision{direction = shortest_direction, position_to_escape = position_to_escape}
+}
+
+bounce_block :: proc(block: ^Block) {
+	append(
+		&world.bouncing_blocks,
+		BouncingBlock{block = block, velocity = {0, 5}, original_position = block.position},
+	)
 }
 
 add_upgrade :: proc(upgrade: UPGRADE) {

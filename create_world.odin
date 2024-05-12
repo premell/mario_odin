@@ -12,6 +12,12 @@ create_world :: proc() {
 		vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded,
 	}
 
+	moving_platform_1 := Block {
+		type = BLOCK.platform,
+		position = {0, 8},
+		hit_box = {height = 1, width = 5},
+	}
+
 	world = World {
 		blocks    = {
 			{type = BLOCK.ground, position = {-20, -20}, hit_box = {height = 20, width = 1000}},
@@ -22,9 +28,12 @@ create_world :: proc() {
 			},
 			{type = BLOCK.ground, position = {-3, 0}, hit_box = {height = 1, width = 1}},
 			{type = BLOCK.ground, position = {-3, 5}, hit_box = {height = 1, width = 1}},
+			{type = BLOCK.ground, position = {-2, 5}, hit_box = {height = 1, width = 1}},
 			{type = BLOCK.ground, position = {3, 0}, hit_box = {height = 1, width = 1}},
 			{type = BLOCK.ground, position = {6, 0}, hit_box = {height = 10, width = 10}},
+			moving_platform_1,
 		},
+		platforms = {{block = &moving_platform_1}},
 		creatures = {
 			{
 				creature_type = CREATURE_TYPE.goomba,

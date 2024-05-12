@@ -69,12 +69,13 @@ Player :: struct {
 }
 
 BLOCK_PROPERTIES :: struct {
-	//bouncable: bool,
+	bouncable: bool,
 	breakable: bool,
 }
 
 // ENUMS
 BLOCK :: enum {
+	platform,
 	ground,
 	questionmark_block,
 	fire,
@@ -83,7 +84,7 @@ BLOCK :: enum {
 }
 
 BLOCK_TYPES: map[BLOCK]BLOCK_PROPERTIES = {
-	BLOCK.ground = {breakable = true},
+	BLOCK.ground = {bouncable = true, breakable = true},
 }
 
 
@@ -95,10 +96,25 @@ Block :: struct {
 	hit_box:  HitBox,
 }
 
+BouncingBlock :: struct {
+	block:             ^Block,
+	using movable:     Moveable,
+	original_position: [2]f32,
+}
+
+Platform :: struct {
+	block:         ^Block,
+	using movable: Moveable,
+	// TODO how should i  program how the platforms move? Just do horizontal movement right now...
+}
+
+
 World :: struct {
 	// blocks are collidable
-	blocks:    [dynamic]Block,
-	creatures: [dynamic]Creature,
+	blocks:          [dynamic]Block,
+	bouncing_blocks: [dynamic]BouncingBlock,
+	platforms:       [dynamic]Platform,
+	creatures:       [dynamic]Creature,
 	//world_update_tick: time.Tick,
 }
 

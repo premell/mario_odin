@@ -18,6 +18,8 @@ render_world :: proc() {
 			SDL.SetRenderDrawColor(game.renderer, 0, 0, 0, 255)
 		case BLOCK.ground:
 			SDL.SetRenderDrawColor(game.renderer, 0, 0, 0, 255)
+		case BLOCK.platform:
+			SDL.SetRenderDrawColor(game.renderer, 0, 0, 0, 255)
 		case BLOCK.questionmark_block:
 			SDL.SetRenderDrawColor(game.renderer, 255, 150, 0, 255)
 		case BLOCK.door:
@@ -72,8 +74,8 @@ render_world :: proc() {
 		SDL.SetRenderDrawColor(game.renderer, 0, 0, 255, 255)
 	} else if includes(player.upgrades, UPGRADE.superman) {
 		SDL.SetRenderDrawColor(game.renderer, 180, 180, 180, 255)
-	}else {
-	   SDL.SetRenderDrawColor(game.renderer, 70, 70, 70, 255)
+	} else {
+		SDL.SetRenderDrawColor(game.renderer, 70, 70, 70, 255)
 	}
 
 
