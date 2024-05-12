@@ -6,6 +6,7 @@ create_world :: proc() {
 	player = Player {
 		creature_type                    = CREATURE_TYPE.player,
 		hit_box                 = {1, 1},
+		position =                 {-4, 0},
 		vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded,
 	}
 

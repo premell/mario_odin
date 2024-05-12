@@ -65,14 +65,12 @@ move_creatures :: proc(ms_since_last_update: f32) {
 		#partial switch creature.type {
 		case CREATURE_TYPE.goomba:
 			if creature.vertical_movement_state == VERTICAL_MOVEMENT_STATE.grounded {
-				GOOMBA_MOVEMENT_SPEED :: 10
+				GOOMBA_MOVEMENT_SPEED :: 4
 				creature.position.x +=
 					(creature.facing_right_else_left ? 1 : -1) *
 					GOOMBA_MOVEMENT_SPEED *
-					ms_since_last_update
-
+					ms_since_last_update / 1000.0
 			}
-			fmt.println(creature.position.x)
 		}
 	}
 }
@@ -114,7 +112,6 @@ update_collisions_blocks :: proc(obj: ^Moveable) {
 			obj.velocity.y = 0
 		} else if collision.direction == DIRECTION.LEFT {
 			obj.position.x = collision.position_to_escape
-			fmt.print(obj.position.x)
 
 			#partial switch obj.creature_type {
 			case CREATURE_TYPE.goomba:
@@ -122,7 +119,6 @@ update_collisions_blocks :: proc(obj: ^Moveable) {
 			}
 		} else if collision.direction == DIRECTION.RIGHT {
 			obj.position.x = collision.position_to_escape
-			fmt.print(obj.position.x)
 
 			#partial switch obj.creature_type {
 			case CREATURE_TYPE.goomba:
