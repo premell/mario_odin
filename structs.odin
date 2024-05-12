@@ -52,21 +52,40 @@ Creature :: struct {
 	using movable: Moveable,
 }
 
+UPGRADE :: enum {
+	fireball_man,
+	big_boy,
+	superman,
+	salmonsays,
+}
+
 Player :: struct {
 	//creature_pointer:                   ^int,
 	is_crouching:       bool,
 	has_jumped, health: int,
 	acceleration:       [2]f32,
+	upgrades:           [dynamic]UPGRADE,
 	using movable:      Moveable,
+}
+
+BLOCK_PROPERTIES :: struct {
+	//bouncable: bool,
+	breakable: bool,
 }
 
 // ENUMS
 BLOCK :: enum {
 	ground,
+	questionmark_block,
 	fire,
 	wall,
 	door,
 }
+
+BLOCK_TYPES: map[BLOCK]BLOCK_PROPERTIES = {
+	BLOCK.ground = {breakable = true},
+}
+
 
 // STRUCTS
 Block :: struct {
@@ -93,6 +112,10 @@ Action :: enum {
 	RIGHT,
 	JUMP,
 	CROUCH,
+
+	// ONLY FOR TESTING
+	// SPAWN_GOOMBA,
+	// RESET_WORLD
 }
 
 Keyboard :: struct {

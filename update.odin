@@ -55,7 +55,6 @@ move_player :: proc(ms_since_last_update: f32) {
 	}
 
 	player.velocity.y += GRAVITY * ms_since_last_update / 1000.0
-
 	player.position = player.position + player.velocity * ms_since_last_update / 1000.0
 
 }
@@ -69,8 +68,13 @@ move_creatures :: proc(ms_since_last_update: f32) {
 				creature.position.x +=
 					(creature.facing_right_else_left ? 1 : -1) *
 					GOOMBA_MOVEMENT_SPEED *
-					ms_since_last_update / 1000.0
+					ms_since_last_update /
+					1000.0
 			}
+
+			creature.velocity.y += GRAVITY * ms_since_last_update / 1000.0
+			creature.position.y += creature.velocity.y * ms_since_last_update / 1000.0
+
 		}
 	}
 }
@@ -99,13 +103,28 @@ update_player_creature_collision :: proc() {
 update_collisions_blocks :: proc(obj: ^Moveable) {
 	obj.vertical_movement_state = VERTICAL_MOVEMENT_STATE.falling
 
-	for block in world.blocks {
+	for block, index in world.blocks {
+		fmt.println(index)
 		collision := check_collision(obj.hit_box, obj.position, block.hit_box, block.position)
 
 		if collision.direction == DIRECTION.NONE {continue}
 
 		if collision.direction == DIRECTION.UP {
 			obj.position.y = collision.position_to_escape
+
+			if BLOCK_TYPES[block.type].breakable {
+				if includes(player.upgrades, UPGRADE.big_boy) {
+					unordered_remove(&world.blocks, index)
+				}
+			}
+
+			if block.type == BLOCK.questionmark_block {
+				add_upgrade(UPGRADE.big_boy)
+			}
+			// bounce block...
+
+			// bounce off
+			obj.velocity.y = BOUNCE_OF_TOP_SPEED
 		} else if collision.direction == DIRECTION.DOWN {
 			obj.position.y = collision.position_to_escape
 			obj.vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded
@@ -199,4 +218,23 @@ check_collision :: proc(
 	}
 
 	return Collision{direction = shortest_direction, position_to_escape = position_to_escape}
+}
+
+add_upgrade :: proc(upgrade: UPGRADE) {
+	append(&player.upgrades, upgrade)
+
+	#partial switch upgrade {
+	case UPGRADE.big_boy:
+		player.hit_box.height = 2
+	}
+
+}
+
+remove_upgrade :: proc(upgrade: UPGRADE) {
+	remove(&player.upgrades, upgrade)
+
+	#partial switch upgrade {
+	case UPGRADE.big_boy:
+		player.hit_box.height = 1
+	}
 }

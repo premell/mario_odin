@@ -18,6 +18,8 @@ render_world :: proc() {
 			SDL.SetRenderDrawColor(game.renderer, 0, 0, 0, 255)
 		case BLOCK.ground:
 			SDL.SetRenderDrawColor(game.renderer, 0, 0, 0, 255)
+		case BLOCK.questionmark_block:
+			SDL.SetRenderDrawColor(game.renderer, 255, 150, 0, 255)
 		case BLOCK.door:
 			SDL.SetRenderDrawColor(game.renderer, 155, 155, 155, 255)
 		}
@@ -40,7 +42,7 @@ render_world :: proc() {
 	// RENDER CREATURES
 	for creature, index in world.creatures {
 		#partial switch creature.type {
-		 case CREATURE_TYPE.goomba:
+		case CREATURE_TYPE.goomba:
 			SDL.SetRenderDrawColor(game.renderer, 0, 255, 0, 255)
 		}
 
@@ -63,7 +65,18 @@ render_world :: proc() {
 
 	// RENDER PLAYER
 	player_position_relative_to_camera := player.position - camera_bottom_left_corner
-	SDL.SetRenderDrawColor(game.renderer, 255, 0, 0, 255)
+
+	if includes(player.upgrades, UPGRADE.fireball_man) {
+		SDL.SetRenderDrawColor(game.renderer, 255, 0, 0, 255)
+	} else if includes(player.upgrades, UPGRADE.salmonsays) {
+		SDL.SetRenderDrawColor(game.renderer, 0, 0, 255, 255)
+	} else if includes(player.upgrades, UPGRADE.superman) {
+		SDL.SetRenderDrawColor(game.renderer, 180, 180, 180, 255)
+	}else {
+	   SDL.SetRenderDrawColor(game.renderer, 70, 70, 70, 255)
+	}
+
+
 	SDL.RenderFillRect(
 		game.renderer,
 		&SDL.Rect{i32(player_position_relative_to_camera[0] * PIXELS_PER_M), WINDOW_HEIGHT - i32(
