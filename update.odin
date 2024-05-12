@@ -19,8 +19,20 @@ update_world :: proc(ms_since_last_update: f32) {
 }
 
 move_platforms :: proc(ms_since_last_update: f32) {
-	for platform in world.platforms {
+	for platform in &world.platforms {
+		platform.block.position.x +=
+			(platform.moving_right_else_left ? 1 : -1) *
+			platform.velocity *
+			ms_since_last_update /
+			1000.0
 
+		if platform.block.position.x < platform.range[0] {
+			platform.block.position.x = platform.range[0]
+			platform.moving_right_else_left = true
+		} else if platform.range[1] < platform.block.position.x {
+			platform.block.position.x = platform.range[1]
+			platform.moving_right_else_left = false
+		}
 	}
 }
 

@@ -103,9 +103,13 @@ BouncingBlock :: struct {
 }
 
 Platform :: struct {
-	block:         ^Block,
-	using movable: Moveable,
+	block:                  ^Block,
+	//using movable: Moveable,
+
 	// TODO how should i  program how the platforms move? Just do horizontal movement right now...
+	range:                  [2]f32, // xStart and xEnd for platform movement
+	velocity:               f32,
+	moving_right_else_left: bool,
 }
 
 
