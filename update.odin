@@ -5,6 +5,19 @@ import "core:math"
 import "core:time"
 
 update_world :: proc(ms_since_last_update: f32) {
+	move_creatures(ms_since_last_update)
+	move_player(ms_since_last_update)
+
+	for creature in &world.creatures {
+		update_collisions_blocks(&creature)
+		//fmt.println(creature)
+	}
+	update_collisions_blocks(&player)
+
+	update_player_creature_collision()
+}
+
+move_player :: proc(ms_since_last_update: f32) {
 	left := includes(keyboard.pressed_or_held_last_frame, Action.LEFT)
 	right := includes(keyboard.pressed_or_held_last_frame, Action.RIGHT)
 	jump := includes(keyboard.pressed_or_held_last_frame, Action.JUMP)
@@ -43,16 +56,29 @@ update_world :: proc(ms_since_last_update: f32) {
 
 	player.velocity.y += GRAVITY * ms_since_last_update / 1000.0
 
-
 	player.position = player.position + player.velocity * ms_since_last_update / 1000.0
 
-	update_collisions(player.position)
+}
+
+move_creatures :: proc(ms_since_last_update: f32) {
+	for creature in &world.creatures {
+		#partial switch creature.type {
+		case CREATURE_TYPE.goomba:
+			if creature.vertical_movement_state == VERTICAL_MOVEMENT_STATE.grounded {
+				GOOMBA_MOVEMENT_SPEED :: 10
+				creature.position.x +=
+					(creature.facing_right_else_left ? 1 : -1) *
+					GOOMBA_MOVEMENT_SPEED *
+					ms_since_last_update
+
+			}
+			fmt.println(creature.position.x)
+		}
+	}
 }
 
 
-update_collisions :: proc(position: [2]f32) {
-	// atm just take the closest path to getting out...
-
+update_player_creature_collision :: proc() {
 	// check creatures
 	for creature in world.creatures {
 		collision := check_collision(
@@ -70,29 +96,38 @@ update_collisions :: proc(position: [2]f32) {
 			player.position.x = -10000
 		}
 	}
+}
 
+update_collisions_blocks :: proc(obj: ^Moveable) {
+	obj.vertical_movement_state = VERTICAL_MOVEMENT_STATE.falling
 
-	// check blocks
 	for block in world.blocks {
-		collision := check_collision(
-			player.hit_box,
-			player.position,
-			block.hit_box,
-			block.position,
-		)
+		collision := check_collision(obj.hit_box, obj.position, block.hit_box, block.position)
 
 		if collision.direction == DIRECTION.NONE {continue}
 
 		if collision.direction == DIRECTION.UP {
-			player.position.y = collision.position_to_escape
+			obj.position.y = collision.position_to_escape
 		} else if collision.direction == DIRECTION.DOWN {
-			player.position.y = collision.position_to_escape
-			player.vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded
-			player.velocity.y = 0
+			obj.position.y = collision.position_to_escape
+			obj.vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded
+			obj.velocity.y = 0
 		} else if collision.direction == DIRECTION.LEFT {
-			player.position.x = collision.position_to_escape
+			obj.position.x = collision.position_to_escape
+			fmt.print(obj.position.x)
+
+			#partial switch obj.creature_type {
+			case CREATURE_TYPE.goomba:
+				obj.facing_right_else_left = true
+			}
 		} else if collision.direction == DIRECTION.RIGHT {
-			player.position.x = collision.position_to_escape
+			obj.position.x = collision.position_to_escape
+			fmt.print(obj.position.x)
+
+			#partial switch obj.creature_type {
+			case CREATURE_TYPE.goomba:
+				obj.facing_right_else_left = false
+			}
 		}
 	}
 }

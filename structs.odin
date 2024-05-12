@@ -26,6 +26,7 @@ CREATURE_TYPE :: enum {
 	koopa,
 	bullet_bill,
 	pipe_trap,
+	player,
 }
 
 VERTICAL_MOVEMENT_STATE :: enum {
@@ -34,30 +35,29 @@ VERTICAL_MOVEMENT_STATE :: enum {
 	jumping, // jumping is only the part until you reach the top of the arc. After that you enter into falling mode
 }
 
+Moveable :: struct {
+	vertical_movement_state: VERTICAL_MOVEMENT_STATE,
+	facing_right_else_left:  bool,
+	hit_box:                 HitBox,
+	// position is bottom left corner of the hitbox
+	position, velocity:      [2]f32,
+	creature_type:           CREATURE_TYPE,
+}
+
 Creature :: struct {
 	//creature_pointer:                   ^int,
-	type:                      CREATURE_TYPE,
-	hit_box:                            HitBox,
-	vertical_movement_state:            VERTICAL_MOVEMENT_STATE,
-	has_jumped, facing_left_else_right: bool,
-	health:                             int,
-
-	// position is bottom left corner of the hitbox
-	position, velocity:                 [2]f32,
-
-	//, acceleration, TODO should they even have acceleration?
+	type:          CREATURE_TYPE,
+	has_jumped:    bool,
+	health:        int,
+	using movable: Moveable,
 }
 
 Player :: struct {
-	is_crouching:                       bool,
 	//creature_pointer:                   ^int,
-	type:                      CREATURE_TYPE,
-	hit_box:                            HitBox,
-	vertical_movement_state:            VERTICAL_MOVEMENT_STATE,
-	has_jumped, facing_left_else_right: bool,
-	health:                             int,
-	// position is bottom left corner of the hitbox
-	position, velocity, acceleration:   [2]f32,
+	is_crouching:       bool,
+	has_jumped, health: int,
+	acceleration:       [2]f32,
+	using movable:      Moveable,
 }
 
 // ENUMS
@@ -101,8 +101,8 @@ Keyboard :: struct {
 }
 
 Collision :: struct {
-// direction is the side which has the closest distance to the edge. I dont know if this is
-// actually true but its quick and dirty
-	direction: DIRECTION,
-	position_to_escape:     f32,
+	// direction is the side which has the closest distance to the edge. I dont know if this is
+	// actually true but its quick and dirty
+	direction:          DIRECTION,
+	position_to_escape: f32,
 }

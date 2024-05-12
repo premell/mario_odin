@@ -4,6 +4,7 @@ import "core:fmt"
 
 create_world :: proc() {
 	player = Player {
+		creature_type                    = CREATURE_TYPE.player,
 		hit_box                 = {1, 1},
 		vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded,
 	}
@@ -17,11 +18,11 @@ create_world :: proc() {
 		},
 		creatures = {
 			{
-				type = CREATURE_TYPE.goomba,
+				creature_type = CREATURE_TYPE.goomba,
 				hit_box = {1, 1},
 				vertical_movement_state = VERTICAL_MOVEMENT_STATE.grounded,
 				has_jumped = false,
-				facing_left_else_right = false,
+				facing_right_else_left = false,
 				health = 100,
 				position = {2, 0},
 			},
